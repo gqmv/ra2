@@ -10,6 +10,8 @@ const store = createXRStore({
 
 const XrHitCubeContainer = () => {
   const [isXRSupported, setIsXRSupported] = useState<boolean | null>(null);
+  const [isInAR, setIsInAR] = useState(false);
+  const [hasPlacedModel, setHasPlacedModel] = useState(false);
 
   useEffect(() => {
     if (navigator.xr) {
@@ -17,6 +19,14 @@ const XrHitCubeContainer = () => {
     } else {
       setIsXRSupported(false);
     }
+  }, []);
+
+  // Listen for XR session changes
+  useEffect(() => {
+    const unsubscribe = store.subscribe((state) => {
+      setIsInAR(!!state.session);
+    });
+    return unsubscribe;
   }, []);
 
   return (
@@ -45,6 +55,29 @@ const XrHitCubeContainer = () => {
           : "AR Not Available"}
       </button>
 
+      {/* AR Instruction Toast */}
+      {isInAR && !hasPlacedModel && (
+        <div
+          style={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            backgroundColor: "rgba(128, 128, 128, 0.9)",
+            color: "white",
+            padding: "16px 24px",
+            borderRadius: "12px",
+            fontSize: "18px",
+            fontWeight: "500",
+            zIndex: 2000,
+            textAlign: "center",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+          }}
+        >
+          Click the screen to place your dish
+        </div>
+      )}
+
       {!isXRSupported && isXRSupported !== null && (
         <div
           style={{
@@ -65,7 +98,7 @@ const XrHitCubeContainer = () => {
 
       <Canvas style={{ height: "100vh" }}>
         <XR store={store}>
-          <XrHitCube />
+          <XrHitCube onModelPlaced={() => setHasPlacedModel(true)} />
         </XR>
       </Canvas>
     </>

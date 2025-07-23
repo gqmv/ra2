@@ -1,11 +1,15 @@
-import { OrbitControls, Text } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import { useXR, useXRHitTest } from "@react-three/xr";
 import { useRef, useState } from "react";
 import * as THREE from "three";
 import Model from "./Model";
 
-const XrHitCube = () => {
+interface XrHitCubeProps {
+  onModelPlaced?: () => void;
+}
+
+const XrHitCube = ({ onModelPlaced }: XrHitCubeProps) => {
   const reticleRef = useRef<THREE.Mesh>(null);
   const [models, setModels] = useState<
     Array<{ position: THREE.Vector3; id: number }>
@@ -46,6 +50,8 @@ const XrHitCube = () => {
       setHasPlacedModel(true);
       // Hide reticle immediately
       reticleRef.current.visible = false;
+      // Notify parent component
+      onModelPlaced?.();
     }
   };
 
@@ -61,33 +67,19 @@ const XrHitCube = () => {
       {/* XR-specific content */}
       {xrState.session &&
         models.map(({ position, id }) => {
-          return <Model key={id} position={position} scale={0.3} />;
+          return <Model key={id} position={position} scale={2} />;
         })}
 
       {xrState.session && !hasPlacedModel && (
-        <>
-          {/* Instruction message */}
-          <Text
-            position={[0, 1.5, -1]}
-            fontSize={0.3}
-            color="white"
-            anchorX="center"
-            anchorY="middle"
-          >
-            Click the screen to place your dish
-          </Text>
-
-          {/* Reticle */}
-          <mesh
-            ref={reticleRef}
-            rotation-x={-Math.PI / 2}
-            visible={false}
-            onPointerDown={placeModel}
-          >
-            <ringGeometry args={[0.1, 0.15, 32]} />
-            <meshStandardMaterial color={"white"} />
-          </mesh>
-        </>
+        <mesh
+          ref={reticleRef}
+          rotation-x={-Math.PI / 2}
+          visible={false}
+          onPointerDown={placeModel}
+        >
+          <ringGeometry args={[0.1, 0.15, 32]} />
+          <meshStandardMaterial color={"white"} />
+        </mesh>
       )}
     </>
   );
