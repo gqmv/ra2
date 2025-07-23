@@ -21,6 +21,7 @@ interface XRSession extends EventTarget {
   cancelAnimationFrame(handle: number): void;
   requestReferenceSpace(type: XRReferenceSpaceType): Promise<XRReferenceSpace>;
   requestHitTestSource(options: XRHitTestOptionsInit): Promise<XRHitTestSource>;
+  updateRenderState(state: Partial<XRRenderState>): Promise<void>;
   end(): Promise<void>;
   renderState: XRRenderState;
   inputSources: XRInputSourceArray;
@@ -96,11 +97,21 @@ interface XRRenderState {
   baseLayer?: XRWebGLLayer;
 }
 
-interface XRWebGLLayer {
+interface XRWebGLLayerInit {
+  antialias?: boolean;
+  alpha?: boolean;
+  depth?: boolean;
+  stencil?: boolean;
+  framebufferScaleFactor?: number;
+}
+
+declare class XRWebGLLayer {
+  constructor(session: XRSession, context: WebGLRenderingContext | WebGL2RenderingContext, options?: XRWebGLLayerInit);
   framebuffer: WebGLFramebuffer | null;
   framebufferWidth: number;
   framebufferHeight: number;
   getViewport(view: XRView): XRViewport;
+  static getNativeFramebufferScaleFactor(session: XRSession): number;
 }
 
 interface XRViewport {

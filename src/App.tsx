@@ -129,6 +129,7 @@ const App: React.FC = () => {
 
   // Stage 6: Per-frame loop
   const onXRFrame = useCallback((_time: number, frame: XRFrame) => {
+    const session = frame.session
     const renderer = rendererRef.current
     const scene = sceneRef.current
     const camera = cameraRef.current
@@ -138,13 +139,17 @@ const App: React.FC = () => {
 
     if (!renderer || !scene || !camera || !reticle || !localSpace) return
 
+    // Get the WebXR layer and bind to its framebuffer
+    const layer = session.renderState.baseLayer
+    if (layer) {
+      renderer.setRenderTarget(null)
+      const gl = renderer.getContext()
+      gl.bindFramebuffer(gl.FRAMEBUFFER, layer.framebuffer)
+    }
+
     // Get viewer pose for the local reference space
     const viewerPose = frame.getViewerPose(localSpace)
     if (viewerPose) {
-      // Update camera matrix from viewer pose
-      camera.matrix.fromArray(viewerPose.transform.matrix)
-      camera.matrixWorldNeedsUpdate = true
-
       // Handle hit testing
       if (hitTestSource) {
         const hitTestResults = frame.getHitTestResults(hitTestSource)
@@ -162,10 +167,25 @@ const App: React.FC = () => {
           reticle.visible = false
         }
       }
-    }
 
-    // Render the scene
-    renderer.render(scene, camera)
+      // Render each view (eye)
+      for (const view of viewerPose.views) {
+        if (layer) {
+          const viewport = layer.getViewport(view)
+          if (viewport) {
+            renderer.setViewport(viewport.x, viewport.y, viewport.width, viewport.height)
+          }
+        }
+
+        // Update camera for this view
+        camera.matrix.fromArray(view.transform.matrix)
+        camera.projectionMatrix.fromArray(view.projectionMatrix)
+        camera.matrixWorldNeedsUpdate = true
+
+        // Render the scene for this view
+        renderer.render(scene, camera)
+      }
+    }
   }, [])
 
   // Stage 7: Place the sphere on select input
@@ -228,77 +248,94 @@ const App: React.FC = () => {
   // Stage 2: Kick-off AR session
   const startAR = useCallback(async () => {
     try {
-      setState(prev => ({ ...prev, isLoading: true, instructions: 'Starting AR session...' }))
+      setState((prev) => ({
+        ...prev,
+        isLoading: true,
+        instructions: "Starting AR session...",
+      }));
 
       if (!navigator.xr) {
-        throw new Error('WebXR not available')
+        throw new Error("WebXR not available");
       }
 
       // Request AR session with required features
-      const session = await navigator.xr.requestSession('immersive-ar', {
-        requiredFeatures: ['local-floor', 'hit-test']
-      })
+      const session = await navigator.xr.requestSession("immersive-ar", {
+        requiredFeatures: ["local-floor", "hit-test"],
+      });
 
-      sessionRef.current = session
+      sessionRef.current = session;
 
       // Setup the 3D scene
-      const sceneSetup = setupScene()
+      const sceneSetup = setupScene();
       if (!sceneSetup) {
-        throw new Error('Failed to setup 3D scene')
+        throw new Error("Failed to setup 3D scene");
       }
 
-      const { renderer } = sceneSetup
+      const { renderer } = sceneSetup;
+
+      // Set up WebXR layer for camera feed
+      const gl = renderer.getContext() as WebGLRenderingContext;
+      const xrLayer = new XRWebGLLayer(session, gl, {
+        antialias: true,
+        alpha: true,
+        depth: true,
+        stencil: false,
+        framebufferScaleFactor: 1.0,
+      });
+
+      // Update session render state with the layer
+      await session.updateRenderState({ baseLayer: xrLayer });
 
       // Stage 4: Get reference spaces
-      const viewerSpace = await session.requestReferenceSpace('viewer')
-      const localSpace = await session.requestReferenceSpace('local-floor')
-      
-      viewerSpaceRef.current = viewerSpace
-      localSpaceRef.current = localSpace
+      const viewerSpace = await session.requestReferenceSpace("viewer");
+      const localSpace = await session.requestReferenceSpace("local-floor");
+
+      viewerSpaceRef.current = viewerSpace;
+      localSpaceRef.current = localSpace;
 
       // Stage 5: Setup hit testing
       if (session.requestHitTestSource) {
         const hitTestSource = await session.requestHitTestSource({
-          space: viewerSpace
-        })
-        hitTestSourceRef.current = hitTestSource || null
+          space: viewerSpace,
+        });
+        hitTestSourceRef.current = hitTestSource || null;
       } else {
-        throw new Error('Hit testing not supported')
+        throw new Error("Hit testing not supported");
       }
 
       // Setup event listeners
-      session.addEventListener('select', onSelect)
-      session.addEventListener('end', () => {
-        setState(prev => ({
+      session.addEventListener("select", onSelect);
+      session.addEventListener("end", () => {
+        setState((prev) => ({
           ...prev,
           isARSession: false,
-          instructions: 'AR session ended. Click "Start AR" to begin again.'
-        }))
-        
+          instructions: 'AR session ended. Click "Start AR" to begin again.',
+        }));
+
         // Clean up
         if (hitTestSourceRef.current) {
-          hitTestSourceRef.current.cancel()
-          hitTestSourceRef.current = null
+          hitTestSourceRef.current.cancel();
+          hitTestSourceRef.current = null;
         }
-        sessionRef.current = null
-        spherePlacedRef.current = false
-        
+        sessionRef.current = null;
+        spherePlacedRef.current = false;
+
         // Remove sphere from scene if it was placed
         if (sphereRef.current && sceneRef.current) {
-          sceneRef.current.remove(sphereRef.current)
+          sceneRef.current.remove(sphereRef.current);
         }
-      })
+      });
 
       // Start the render loop
-      renderer.setAnimationLoop(onXRFrame)
+      renderer.setAnimationLoop(onXRFrame);
 
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         isARSession: true,
         isLoading: false,
-        instructions: 'Point your camera at a flat surface and tap to place a sphere!'
-      }))
-
+        instructions:
+          "Point your camera at a flat surface and tap to place a sphere!",
+      }));
     } catch (error) {
       setState(prev => ({
         ...prev,
