@@ -327,6 +327,10 @@ const App: React.FC = () => {
 
       // Set up WebXR layer for camera feed
       const gl = renderer.getContext() as WebGLRenderingContext;
+
+      // Make the WebGL context XR compatible - this is crucial!
+      await gl.makeXRCompatible();
+
       const xrLayer = new XRWebGLLayer(session, gl, {
         antialias: true,
         alpha: true,
@@ -388,7 +392,7 @@ const App: React.FC = () => {
         instructions:
           "Point your camera at a flat surface and tap to place a sphere!",
       }));
-         } catch (error) {
+    } catch (error) {
        const errorMessage = error instanceof Error ? error.message : String(error)
        addError(`AR Session Start Failed: ${errorMessage}`)
        setState(prev => ({

@@ -4,6 +4,15 @@ interface Navigator {
   xr?: XRSystem;
 }
 
+// Extend WebGL contexts to include makeXRCompatible method
+interface WebGLRenderingContext {
+  makeXRCompatible(): Promise<void>;
+}
+
+interface WebGL2RenderingContext {
+  makeXRCompatible(): Promise<void>;
+}
+
 interface XRSystem {
   isSessionSupported(mode: XRSessionMode): Promise<boolean>;
   requestSession(mode: XRSessionMode, options?: XRSessionInit): Promise<XRSession>;
