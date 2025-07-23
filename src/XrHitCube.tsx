@@ -67,7 +67,7 @@ const XrHitCube = ({ onModelPlaced }: XrHitCubeProps) => {
       {/* XR-specific content */}
       {xrState.session &&
         models.map(({ position, id }) => {
-          return <Model key={id} position={position} scale={2} />;
+          return <Model key={id} position={position} scale={1} />;
         })}
 
       {xrState.session && !hasPlacedModel && (
