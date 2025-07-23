@@ -1,4 +1,4 @@
-import { OrbitControls } from "@react-three/drei";
+import { OrbitControls, Text } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import { useXR, useXRHitTest } from "@react-three/xr";
 import { useRef, useState } from "react";
@@ -10,6 +10,7 @@ const XrHitCube = () => {
   const [models, setModels] = useState<
     Array<{ position: THREE.Vector3; id: number }>
   >([]);
+  const [hasPlacedModel, setHasPlacedModel] = useState(false);
 
   const xrState = useXR((state) => state);
 
@@ -20,7 +21,7 @@ const XrHitCube = () => {
   });
 
   useXRHitTest((results, getWorldMatrix) => {
-    if (results.length > 0 && reticleRef.current) {
+    if (results.length > 0 && reticleRef.current && !hasPlacedModel) {
       const hit = results[0];
       const matrix = new THREE.Matrix4();
       if (getWorldMatrix(matrix, hit)) {
@@ -38,10 +39,13 @@ const XrHitCube = () => {
   }, "viewer");
 
   const placeModel = () => {
-    if (reticleRef.current && reticleRef.current.visible) {
+    if (reticleRef.current && reticleRef.current.visible && !hasPlacedModel) {
       const position = reticleRef.current.position.clone();
       const id = Date.now();
       setModels([...models, { position, id }]);
+      setHasPlacedModel(true);
+      // Hide reticle immediately
+      reticleRef.current.visible = false;
     }
   };
 
@@ -52,7 +56,7 @@ const XrHitCube = () => {
       <directionalLight position={[10, 10, 5]} intensity={0.8} />
 
       {/* Always show at least one model for testing */}
-      <Model position={[0, 0, 0]} scale={2} />
+      {!xrState.session && <Model position={[0, 0, 0]} scale={2} />}
 
       {/* XR-specific content */}
       {xrState.session &&
@@ -60,19 +64,33 @@ const XrHitCube = () => {
           return <Model key={id} position={position} scale={0.3} />;
         })}
 
-      {xrState.session && (
-        <mesh
-          ref={reticleRef}
-          rotation-x={-Math.PI / 2}
-          visible={false}
-          onPointerDown={placeModel}
-        >
-          <ringGeometry args={[0.1, 0.15, 32]} />
-          <meshStandardMaterial color={"white"} />
-        </mesh>
+      {xrState.session && !hasPlacedModel && (
+        <>
+          {/* Instruction message */}
+          <Text
+            position={[0, 1.5, -1]}
+            fontSize={0.3}
+            color="white"
+            anchorX="center"
+            anchorY="middle"
+          >
+            Click the screen to place your dish
+          </Text>
+
+          {/* Reticle */}
+          <mesh
+            ref={reticleRef}
+            rotation-x={-Math.PI / 2}
+            visible={false}
+            onPointerDown={placeModel}
+          >
+            <ringGeometry args={[0.1, 0.15, 32]} />
+            <meshStandardMaterial color={"white"} />
+          </mesh>
+        </>
       )}
     </>
   );
 };
 
-export default XrHitCube; 
+export default XrHitCube;
