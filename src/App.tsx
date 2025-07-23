@@ -1,8 +1,8 @@
 import React from "react";
-import SimpleWebXR from "./SimpleWebXR";
+import XrHitCubeContainer from "./XrHitCubeContainer";
 
 const App: React.FC = () => {
-  return <SimpleWebXR />;
+  return <XrHitCubeContainer />;
 };
 
 export default App;
