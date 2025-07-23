@@ -61,7 +61,7 @@ const XrHitCube = () => {
           visible={false}
           onPointerDown={placeCube}
         >
-          <ringGeometry args={[0.1, 0.25, 32]} />
+          <ringGeometry args={[0.1, 0.15, 32]} />
           <meshStandardMaterial color={"white"} />
         </mesh>
       )}
