@@ -169,133 +169,166 @@ const App: React.FC = () => {
   }, [addError])
 
   // Stage 6: Per-frame loop
-  const onXRFrame = useCallback((_time: number, frame: XRFrame) => {
-    try {
-      const session = frame.session
-      const renderer = rendererRef.current
-      const scene = sceneRef.current
-      const camera = cameraRef.current
-      const reticle = reticleRef.current
-      const hitTestSource = hitTestSourceRef.current
-      const localSpace = localSpaceRef.current
-
-      if (!renderer || !scene || !camera || !reticle || !localSpace) return
-
-      // Get the WebXR layer and bind to its framebuffer
-      const layer = session.renderState.baseLayer
-      if (layer) {
-        renderer.setRenderTarget(null)
-        const gl = renderer.getContext()
-        gl.bindFramebuffer(gl.FRAMEBUFFER, layer.framebuffer)
-      }
-
-      // Get viewer pose for the local reference space
-      const viewerPose = frame.getViewerPose(localSpace)
-      if (viewerPose) {
-        // Handle hit testing
-        if (hitTestSource) {
-          const hitTestResults = frame.getHitTestResults(hitTestSource)
-          
-          if (hitTestResults.length > 0) {
-            const hit = hitTestResults[0]
-            const pose = hit.getPose(localSpace)
-            
-            if (pose) {
-              // Update reticle position to show where sphere can be placed
-              reticle.matrix.fromArray(pose.transform.matrix)
-              reticle.visible = true
-            }
-          } else {
-            reticle.visible = false
-          }
+  const onXRFrame = useCallback(
+    (_time: number, frame: XRFrame) => {
+      try {
+        // Safety check - frame can be undefined in some edge cases
+        if (!frame || !frame.session) {
+          return;
         }
 
-        // Render each view (eye)
-        for (const view of viewerPose.views) {
-          if (layer) {
-            const viewport = layer.getViewport(view)
-            if (viewport) {
-              renderer.setViewport(viewport.x, viewport.y, viewport.width, viewport.height)
+        const session = frame.session;
+        const renderer = rendererRef.current;
+        const scene = sceneRef.current;
+        const camera = cameraRef.current;
+        const reticle = reticleRef.current;
+        const hitTestSource = hitTestSourceRef.current;
+        const localSpace = localSpaceRef.current;
+
+        if (!renderer || !scene || !camera || !reticle || !localSpace) {
+          return;
+        }
+
+        // Additional safety check - ensure session is still active
+        if (!sessionRef.current || sessionRef.current !== session) {
+          return;
+        }
+
+        // Get the WebXR layer and bind to its framebuffer
+        const layer = session.renderState.baseLayer;
+        if (layer) {
+          renderer.setRenderTarget(null);
+          const gl = renderer.getContext();
+          gl.bindFramebuffer(gl.FRAMEBUFFER, layer.framebuffer);
+        }
+
+        // Get viewer pose for the local reference space
+        const viewerPose = frame.getViewerPose(localSpace);
+        if (viewerPose) {
+          // Handle hit testing
+          if (hitTestSource) {
+            const hitTestResults = frame.getHitTestResults(hitTestSource);
+
+            if (hitTestResults.length > 0) {
+              const hit = hitTestResults[0];
+              const pose = hit.getPose(localSpace);
+
+              if (pose) {
+                // Update reticle position to show where sphere can be placed
+                reticle.matrix.fromArray(pose.transform.matrix);
+                reticle.visible = true;
+              }
+            } else {
+              reticle.visible = false;
             }
           }
 
-          // Update camera for this view
-          camera.matrix.fromArray(view.transform.matrix)
-          camera.projectionMatrix.fromArray(view.projectionMatrix)
-          camera.matrixWorldNeedsUpdate = true
+          // Render each view (eye)
+          for (const view of viewerPose.views) {
+            if (layer) {
+              const viewport = layer.getViewport(view);
+              if (viewport) {
+                renderer.setViewport(
+                  viewport.x,
+                  viewport.y,
+                  viewport.width,
+                  viewport.height
+                );
+              }
+            }
 
-          // Render the scene for this view
-          renderer.render(scene, camera)
+            // Update camera for this view
+            camera.matrix.fromArray(view.transform.matrix);
+            camera.projectionMatrix.fromArray(view.projectionMatrix);
+            camera.matrixWorldNeedsUpdate = true;
+
+            // Render the scene for this view
+            renderer.render(scene, camera);
+          }
+        }
+      } catch (error) {
+        // Only log frame errors occasionally to avoid spam
+        if (Math.random() < 0.01) {
+          // 1% chance to log
+          addError(
+            `Frame render error: ${
+              error instanceof Error ? error.message : error
+            }`
+          );
         }
       }
-    } catch (error) {
-      // Only log frame errors occasionally to avoid spam
-      if (Math.random() < 0.01) { // 1% chance to log
-        addError(`Frame render error: ${error instanceof Error ? error.message : error}`)
-      }
-    }
-  }, [addError])
+    },
+    [addError]
+  );
 
   // Stage 7: Place the sphere on select input
-  const onSelect = useCallback((event: XRInputSourceEvent) => {
-    try {
-      const hitTestSource = hitTestSourceRef.current
-      const localSpace = localSpaceRef.current
-      const sphere = sphereRef.current
-      const scene = sceneRef.current
+  const onSelect = useCallback(
+    (event: XRInputSourceEvent) => {
+      try {
+        const hitTestSource = hitTestSourceRef.current;
+        const localSpace = localSpaceRef.current;
+        const sphere = sphereRef.current;
+        const scene = sceneRef.current;
 
-      if (!hitTestSource || !localSpace || !sphere || !scene) return
-      if (spherePlacedRef.current) return // Only place one sphere
+        if (!hitTestSource || !localSpace || !sphere || !scene) return;
+        if (spherePlacedRef.current) return; // Only place one sphere
 
-      const frame = event.frame
-      const hitTestResults = frame.getHitTestResults(hitTestSource)
+        const frame = event.frame;
+        const hitTestResults = frame.getHitTestResults(hitTestSource);
 
-      if (hitTestResults.length > 0) {
-        const hit = hitTestResults[0]
-        const pose = hit.getPose(localSpace)
+        if (hitTestResults.length > 0) {
+          const hit = hitTestResults[0];
+          const pose = hit.getPose(localSpace);
 
-        if (pose) {
-          // Position sphere at hit location
-          sphere.position.set(
-            pose.transform.position.x,
-            pose.transform.position.y,
-            pose.transform.position.z
-          )
-          sphere.quaternion.set(
-            pose.transform.orientation.x,
-            pose.transform.orientation.y,
-            pose.transform.orientation.z,
-            pose.transform.orientation.w
-          )
+          if (pose) {
+            // Position sphere at hit location
+            sphere.position.set(
+              pose.transform.position.x,
+              pose.transform.position.y,
+              pose.transform.position.z
+            );
+            sphere.quaternion.set(
+              pose.transform.orientation.x,
+              pose.transform.orientation.y,
+              pose.transform.orientation.z,
+              pose.transform.orientation.w
+            );
 
-          // Add sphere to scene
-          scene.add(sphere)
-          spherePlacedRef.current = true
+            // Add sphere to scene
+            scene.add(sphere);
+            spherePlacedRef.current = true;
 
-          setState(prev => ({
-            ...prev,
-            instructions: 'Sphere placed! Move around to see it from different angles.'
-          }))
+            setState((prev) => ({
+              ...prev,
+              instructions:
+                "Sphere placed! Move around to see it from different angles.",
+            }));
 
-          // Try to create an anchor for stability (optional)
-          if (frame.createAnchor && hit.createAnchor) {
-            const anchorPromise = hit.createAnchor(pose.transform)
-            if (anchorPromise) {
-              anchorPromise
-                .then(() => {
-                  console.log('Anchor created successfully')
-                })
-                .catch((error) => {
-                  addError(`Anchor creation failed: ${error}`)
-                })
+            // Try to create an anchor for stability (optional)
+            if (frame.createAnchor && hit.createAnchor) {
+              const anchorPromise = hit.createAnchor(pose.transform);
+              if (anchorPromise) {
+                anchorPromise
+                  .then(() => {
+                    console.log("Anchor created successfully");
+                  })
+                  .catch((error) => {
+                    addError(`Anchor creation failed: ${error}`);
+                  });
+              }
             }
           }
         }
+      } catch (error) {
+        addError(
+          `Sphere placement error: ${
+            error instanceof Error ? error.message : error
+          }`
+        );
       }
-    } catch (error) {
-      addError(`Sphere placement error: ${error instanceof Error ? error.message : error}`)
-    }
-  }, [addError])
+    },
+    [addError]
+  );
 
   // Stage 2: Kick-off AR session
   const startAR = useCallback(async () => {
@@ -373,6 +406,12 @@ const App: React.FC = () => {
           hitTestSourceRef.current.cancel();
           hitTestSourceRef.current = null;
         }
+
+        // Stop animation loop
+        if (rendererRef.current) {
+          rendererRef.current.setAnimationLoop(null);
+        }
+
         sessionRef.current = null;
         spherePlacedRef.current = false;
 
@@ -393,28 +432,44 @@ const App: React.FC = () => {
           "Point your camera at a flat surface and tap to place a sphere!",
       }));
     } catch (error) {
-       const errorMessage = error instanceof Error ? error.message : String(error)
-       addError(`AR Session Start Failed: ${errorMessage}`)
-       setState(prev => ({
-         ...prev,
-         isLoading: false,
-         error: `Failed to start AR: ${errorMessage}`,
-         instructions: 'Failed to start AR session. Please try again.'
-       }))
-     }
-     }, [setupScene, onXRFrame, onSelect, addError])
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      addError(`AR Session Start Failed: ${errorMessage}`);
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: `Failed to start AR: ${errorMessage}`,
+        instructions: "Failed to start AR session. Please try again.",
+      }));
+    }
+  }, [setupScene, onXRFrame, onSelect, addError]);
 
   // Stage 9: End session
   const endAR = useCallback(async () => {
-    const session = sessionRef.current
+    const session = sessionRef.current;
     if (session) {
       try {
-        await session.end()
+        await session.end();
       } catch (error) {
-        console.warn('Error ending session:', error)
+        addError(`Error ending session: ${error}`);
+        // Force cleanup even if session.end() fails
+        if (rendererRef.current) {
+          rendererRef.current.setAnimationLoop(null);
+        }
+        if (hitTestSourceRef.current) {
+          hitTestSourceRef.current.cancel();
+          hitTestSourceRef.current = null;
+        }
+        sessionRef.current = null;
+        spherePlacedRef.current = false;
+        setState((prev) => ({
+          ...prev,
+          isARSession: false,
+          instructions: 'AR session ended. Click "Start AR" to begin again.',
+        }));
       }
     }
-  }, [])
+  }, [addError]);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
