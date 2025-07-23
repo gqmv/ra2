@@ -52,7 +52,7 @@ const XrHitCube = () => {
       <directionalLight position={[10, 10, 5]} intensity={0.8} />
 
       {/* Always show at least one model for testing */}
-      <Model position={[0, 0, 0]} scale={0.5} />
+      <Model position={[0, 0, 0]} scale={2} />
 
       {/* XR-specific content */}
       {xrState.session &&
