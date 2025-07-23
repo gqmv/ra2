@@ -1,0 +1,11 @@
+Model Information:
+* title:	Sushi Boat Nigiri
+* source:	https://sketchfab.com/3d-models/sushi-boat-nigiri-6d05edeb11f947f28911f93283ee9994
+* author:	Zoltanfood (https://sketchfab.com/zoltanfood)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Sushi Boat Nigiri" (https://sketchfab.com/3d-models/sushi-boat-nigiri-6d05edeb11f947f28911f93283ee9994) by Zoltanfood (https://sketchfab.com/zoltanfood) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

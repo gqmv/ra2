@@ -3,18 +3,20 @@ import { useThree } from "@react-three/fiber";
 import { useXR, useXRHitTest } from "@react-three/xr";
 import { useRef, useState } from "react";
 import * as THREE from "three";
-import Cube from "./Cube";
+import Model from "./Model";
 
 const XrHitCube = () => {
   const reticleRef = useRef<THREE.Mesh>(null);
-  const [cubes, setCubes] = useState<Array<{ position: THREE.Vector3; id: number }>>([]);
+  const [models, setModels] = useState<
+    Array<{ position: THREE.Vector3; id: number }>
+  >([]);
 
   const xrState = useXR((state) => state);
 
   useThree(({ camera }) => {
-    if (!xrState.session) {
-      camera.position.z = 3;
-    }
+    // Always set camera position for non-XR mode
+    camera.position.set(0, 1, 3);
+    camera.lookAt(0, 0, 0);
   });
 
   useXRHitTest((results, getWorldMatrix) => {
@@ -35,23 +37,27 @@ const XrHitCube = () => {
     }
   }, "viewer");
 
-  const placeCube = () => {
+  const placeModel = () => {
     if (reticleRef.current && reticleRef.current.visible) {
       const position = reticleRef.current.position.clone();
       const id = Date.now();
-      setCubes([...cubes, { position, id }]);
+      setModels([...models, { position, id }]);
     }
   };
 
   return (
     <>
-      <OrbitControls />
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[10, 10, 5]} intensity={1} />
+      <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
+      <ambientLight intensity={0.6} />
+      <directionalLight position={[10, 10, 5]} intensity={0.8} />
 
+      {/* Always show at least one model for testing */}
+      <Model position={[0, 0, 0]} scale={0.5} />
+
+      {/* XR-specific content */}
       {xrState.session &&
-        cubes.map(({ position, id }) => {
-          return <Cube key={id} position={position} />;
+        models.map(({ position, id }) => {
+          return <Model key={id} position={position} scale={0.3} />;
         })}
 
       {xrState.session && (
@@ -59,14 +65,12 @@ const XrHitCube = () => {
           ref={reticleRef}
           rotation-x={-Math.PI / 2}
           visible={false}
-          onPointerDown={placeCube}
+          onPointerDown={placeModel}
         >
           <ringGeometry args={[0.1, 0.15, 32]} />
           <meshStandardMaterial color={"white"} />
         </mesh>
       )}
-
-      {!xrState.session && <Cube position={[0, 0, 0]} />}
     </>
   );
 };
