@@ -9,7 +9,7 @@ interface ModelProps {
 
 const Model = ({ position = [0, 0, 0], scale = 1 }: ModelProps) => {
   const groupRef = useRef<THREE.Group>(null);
-  const { scene } = useGLTF("/scene.gltf");
+  const { scene } = useGLTF("/result.gltf");
 
   return (
     <group ref={groupRef} position={position} scale={scale}>
