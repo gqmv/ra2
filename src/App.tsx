@@ -1,11 +1,22 @@
 import React from "react";
-import XrHitCubeContainer from "./XrHitCubeContainer";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import ARView from "./ARView";
+import Menu from "./Menu";
 import type { MenuItem } from "./types";
 
-const menuItem: MenuItem = { model_path: "/scene.gltf" };
+const items: MenuItem[] = [
+  { id: "dish-1", name: "Signature Dish", model_path: "/scene.gltf" },
+];
 
 const App: React.FC = () => {
-  return <XrHitCubeContainer menuItem={menuItem} />;
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Menu items={items} />} />
+        <Route path="/ar/:id" element={<ARView items={items} />} />
+      </Routes>
+    </BrowserRouter>
+  );
 };
 
 export default App;
