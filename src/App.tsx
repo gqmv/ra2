@@ -27,7 +27,7 @@ const items: MenuItem[] = [
     model_path: "/chicken.gltf",
     description:
       "Chicken is a type of domesticated fowl, a subspecies of the red junglefowl (Gallus gallus). Chickens are one of the most common and widespread domestic animals, with a total population of 23.7 billion as of 2018.",
-    scale: 0.3,
+    scale: 0.2,
   },
 ];
 
