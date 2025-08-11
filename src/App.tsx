@@ -9,19 +9,25 @@ const items: MenuItem[] = [
     id: "sushi",
     name: "Sushi",
     model_path: "/sushi.gltf",
-    description: "Simple but delicious sushi platter.",
+    description:
+      "Sushi is a Japanese dish of prepared vinegared rice, usually with some sugar and salt, accompanying a variety of ingredients, such as seafood, vegetables, and occasionally tropical fruits.",
+    scale: 2,
   },
   {
     id: "salad",
     name: "Salad",
     model_path: "/salad.gltf",
-    description: "Homemade salad with lettuce, tomatoes and carrots.",
+    description:
+      "A salad is a dish consisting of mixed, mostly natural ingredients with a dressing (such as a vinegar or oil-based sauce) used to enhance their flavor.",
+    scale: 0.65,
   },
   {
     id: "chicken",
     name: "Chicken",
     model_path: "/chicken.gltf",
-    description: "Chicken with rice. As simple as it gets.",
+    description:
+      "Chicken is a type of domesticated fowl, a subspecies of the red junglefowl (Gallus gallus). Chickens are one of the most common and widespread domestic animals, with a total population of 23.7 billion as of 2018.",
+    scale: 1,
   },
 ];
 

@@ -21,6 +21,7 @@ const XrHitCube = ({ onModelPlaced, menuItem }: XrHitCubeProps) => {
   const xrState = useXR((state) => state);
 
   const activeModelPath = menuItem.model_path;
+  const itemScale = menuItem.scale ?? 1;
 
   useThree(({ camera }) => {
     camera.position.set(0, 1, 3);
@@ -63,7 +64,11 @@ const XrHitCube = ({ onModelPlaced, menuItem }: XrHitCubeProps) => {
       <directionalLight position={[10, 10, 5]} intensity={0.8} />
 
       {!xrState.session && (
-        <Model modelPath={activeModelPath} position={[0, 0, 0]} scale={2} />
+        <Model
+          modelPath={activeModelPath}
+          position={[0, 0, 0]}
+          scale={itemScale}
+        />
       )}
 
       {xrState.session &&
@@ -72,7 +77,7 @@ const XrHitCube = ({ onModelPlaced, menuItem }: XrHitCubeProps) => {
             key={id}
             modelPath={activeModelPath}
             position={position}
-            scale={1}
+            scale={itemScale}
           />
         ))}
 
