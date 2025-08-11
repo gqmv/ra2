@@ -19,7 +19,7 @@ const items: MenuItem[] = [
     model_path: "/salad.gltf",
     description:
       "A salad is a dish consisting of mixed, mostly natural ingredients with a dressing (such as a vinegar or oil-based sauce) used to enhance their flavor.",
-    scale: 0.65,
+    scale: 0.25,
   },
   {
     id: "chicken",
@@ -27,7 +27,7 @@ const items: MenuItem[] = [
     model_path: "/chicken.gltf",
     description:
       "Chicken is a type of domesticated fowl, a subspecies of the red junglefowl (Gallus gallus). Chickens are one of the most common and widespread domestic animals, with a total population of 23.7 billion as of 2018.",
-    scale: 1,
+    scale: 0.4,
   },
 ];
 
