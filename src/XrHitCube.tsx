@@ -4,12 +4,14 @@ import { useXR, useXRHitTest } from "@react-three/xr";
 import { useRef, useState } from "react";
 import * as THREE from "three";
 import Model from "./Model";
+import type { MenuItem } from "./types";
 
 interface XrHitCubeProps {
   onModelPlaced?: () => void;
+  menuItem: MenuItem;
 }
 
-const XrHitCube = ({ onModelPlaced }: XrHitCubeProps) => {
+const XrHitCube = ({ onModelPlaced, menuItem }: XrHitCubeProps) => {
   const reticleRef = useRef<THREE.Mesh>(null);
   const [models, setModels] = useState<
     Array<{ position: THREE.Vector3; id: number }>
@@ -18,8 +20,9 @@ const XrHitCube = ({ onModelPlaced }: XrHitCubeProps) => {
 
   const xrState = useXR((state) => state);
 
+  const activeModelPath = menuItem.model_path;
+
   useThree(({ camera }) => {
-    // Always set camera position for non-XR mode
     camera.position.set(0, 1, 3);
     camera.lookAt(0, 0, 0);
   });
@@ -46,29 +49,32 @@ const XrHitCube = ({ onModelPlaced }: XrHitCubeProps) => {
     if (reticleRef.current && reticleRef.current.visible && !hasPlacedModel) {
       const position = reticleRef.current.position.clone();
       const id = Date.now();
-      setModels([...models, { position, id }]);
+      setModels([{ position, id }]);
       setHasPlacedModel(true);
-      // Hide reticle immediately
       reticleRef.current.visible = false;
-      // Notify parent component
       onModelPlaced?.();
     }
   };
 
   return (
     <>
-      <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
+      <OrbitControls enablePan enableZoom enableRotate />
       <ambientLight intensity={0.6} />
       <directionalLight position={[10, 10, 5]} intensity={0.8} />
 
-      {/* Always show at least one model for testing */}
-      {!xrState.session && <Model position={[0, 0, 0]} scale={2} />}
+      {!xrState.session && (
+        <Model modelPath={activeModelPath} position={[0, 0, 0]} scale={2} />
+      )}
 
-      {/* XR-specific content */}
       {xrState.session &&
-        models.map(({ position, id }) => {
-          return <Model key={id} position={position} scale={1} />;
-        })}
+        models.map(({ position, id }) => (
+          <Model
+            key={id}
+            modelPath={activeModelPath}
+            position={position}
+            scale={1}
+          />
+        ))}
 
       {xrState.session && !hasPlacedModel && (
         <mesh

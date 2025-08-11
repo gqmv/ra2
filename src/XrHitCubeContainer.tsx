@@ -2,13 +2,18 @@ import { Canvas } from "@react-three/fiber";
 import { createXRStore, XR } from "@react-three/xr";
 import { useEffect, useState } from "react";
 import XrHitCube from "./XrHitCube";
+import type { MenuItem } from "./types";
 
 const store = createXRStore({
   hand: true,
   controller: true,
 });
 
-const XrHitCubeContainer = () => {
+interface XrHitCubeContainerProps {
+  menuItem: MenuItem;
+}
+
+const XrHitCubeContainer = ({ menuItem }: XrHitCubeContainerProps) => {
   const [isXRSupported, setIsXRSupported] = useState<boolean | null>(null);
   const [isInAR, setIsInAR] = useState(false);
   const [hasPlacedModel, setHasPlacedModel] = useState(false);
@@ -98,7 +103,10 @@ const XrHitCubeContainer = () => {
 
       <Canvas style={{ height: "100vh" }}>
         <XR store={store}>
-          <XrHitCube onModelPlaced={() => setHasPlacedModel(true)} />
+          <XrHitCube
+            menuItem={menuItem}
+            onModelPlaced={() => setHasPlacedModel(true)}
+          />
         </XR>
       </Canvas>
     </>
