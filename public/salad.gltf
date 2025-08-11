@@ -1,0 +1,222 @@
+{
+    "asset": {
+        "version": "2.0",
+        "generator": "Open Asset Import Library (assimp v5.4.0)"
+    },
+    "extensionsUsed": [
+        "KHR_materials_volume",
+        "FB_ngon_encoding"
+    ],
+    "accessors": [
+        {
+            "bufferView": 0,
+            "byteOffset": 0,
+            "componentType": 5126,
+            "count": 10169,
+            "type": "VEC3",
+            "max": [
+                0.7650962471961975,
+                0.35071760416030884,
+                0.9260629415512085
+            ],
+            "min": [
+                -0.5885649919509888,
+                0.05787024646997452,
+                -0.42523911595344543
+            ]
+        },
+        {
+            "bufferView": 1,
+            "byteOffset": 0,
+            "componentType": 5126,
+            "count": 10169,
+            "type": "VEC3",
+            "max": [
+                0.9998307228088379,
+                0.9999919533729553,
+                0.9999308586120605
+            ],
+            "min": [
+                -0.9999421834945679,
+                -0.9711788892745972,
+                -0.9998361468315125
+            ]
+        },
+        {
+            "bufferView": 2,
+            "byteOffset": 0,
+            "componentType": 5126,
+            "count": 10169,
+            "type": "VEC2",
+            "max": [
+                0.9999740123748779,
+                0.9999822974205017
+            ],
+            "min": [
+                0.00008080703264568001,
+                0.014822304248809814
+            ]
+        },
+        {
+            "bufferView": 3,
+            "byteOffset": 0,
+            "componentType": 5126,
+            "count": 10169,
+            "type": "VEC2",
+            "max": [
+                0.9999740123748779,
+                0.9999822974205017
+            ],
+            "min": [
+                0.00008080703264568001,
+                0.014822304248809814
+            ]
+        },
+        {
+            "bufferView": 4,
+            "byteOffset": 0,
+            "componentType": 5125,
+            "count": 47538,
+            "type": "SCALAR",
+            "max": [
+                10168
+            ],
+            "min": [
+                0
+            ]
+        }
+    ],
+    "buffers": [
+        {
+            "byteLength": 596912,
+            "uri": "salad.bin"
+        }
+    ],
+    "bufferViews": [
+        {
+            "buffer": 0,
+            "byteOffset": 0,
+            "byteLength": 122028,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 122028,
+            "byteLength": 122028,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 244056,
+            "byteLength": 81352,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 325408,
+            "byteLength": 81352,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 406760,
+            "byteLength": 190152,
+            "target": 34963
+        }
+    ],
+    "images": [
+        {
+            "uri": "textures/salad/image_0.png"
+        },
+        {
+            "uri": "textures/salad/image_1.png"
+        },
+        {
+            "uri": "textures/salad/image_2.png"
+        }
+    ],
+    "materials": [
+        {
+            "name": "Mat_1",
+            "pbrMetallicRoughness": {
+                "baseColorTexture": {
+                    "index": 0
+                },
+                "metallicFactor": 0.0
+            },
+            "normalTexture": {
+                "index": 1
+            },
+            "occlusionTexture": {
+                "index": 2,
+                "texCoord": 1
+            }
+        }
+    ],
+    "meshes": [
+        {
+            "name": "meshes[0]",
+            "primitives": [
+                {
+                    "mode": 4,
+                    "material": 0,
+                    "indices": 4,
+                    "attributes": {
+                        "POSITION": 0,
+                        "NORMAL": 1,
+                        "TEXCOORD_0": 2,
+                        "TEXCOORD_1": 3
+                    }
+                }
+            ]
+        }
+    ],
+    "nodes": [
+        {
+            "name": "11_08_2025",
+            "children": [
+                1
+            ]
+        },
+        {
+            "name": "mesh_0",
+            "mesh": 0
+        }
+    ],
+    "samplers": [
+        {
+            "magFilter": 9729,
+            "minFilter": 9987
+        },
+        {
+            "magFilter": 9729,
+            "minFilter": 9987
+        },
+        {
+            "magFilter": 9729,
+            "minFilter": 9987
+        }
+    ],
+    "scenes": [
+        {
+            "nodes": [
+                0
+            ]
+        }
+    ],
+    "textures": [
+        {
+            "source": 0,
+            "sampler": 0
+        },
+        {
+            "source": 1,
+            "sampler": 1
+        },
+        {
+            "source": 2,
+            "sampler": 2
+        }
+    ],
+    "scene": 0
+}

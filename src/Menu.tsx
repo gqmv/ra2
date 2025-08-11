@@ -27,11 +27,12 @@ export default function Menu({ items }: { items: MenuItem[] }) {
         {items.map((item) => (
           <div key={item.id} style={cardStyle}>
             <div style={{ fontSize: 18, fontWeight: 600 }}>{item.name}</div>
-            <div style={{ opacity: 0.8, fontSize: 12 }}>{item.model_path}</div>
+            <div style={{ opacity: 0.8, fontSize: 12 }}>{item.description}</div>
             <Link
               to={`/ar/${encodeURIComponent(item.id)}`}
               style={{
-                marginTop: 8,
+                marginTop: "auto",
+                display: "block",
                 background: "#10b981",
                 color: "#111827",
                 textDecoration: "none",
